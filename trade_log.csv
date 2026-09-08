@@ -1,0 +1,4 @@
+timestamp,symbol,price,signal,order_action,order_status,order_id,order_qty,comment
+2026-06-24T15:16:15.567380+00:00,AAPL,297.26,1,signal,signal-only,,,
+2026-06-24T15:16:15.567380+00:00,NVDA,201.06,0,none,,,,
+2026-06-24T15:16:15.567380+00:00,QQQ,717.08,1,signal,signal-only,,,

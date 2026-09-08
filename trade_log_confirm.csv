@@ -1,0 +1,4 @@
+timestamp,symbol,price,signal,order_action,order_status,order_id,order_qty,comment
+2026-06-24T15:17:13.805245+00:00,AAPL,297.345,1,submit,dry-run,,,
+2026-06-24T15:17:13.805245+00:00,NVDA,201.095,0,none,,,,
+2026-06-24T15:17:13.805245+00:00,QQQ,717.52,1,submit,dry-run,,,

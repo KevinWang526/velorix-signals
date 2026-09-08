@@ -1,0 +1,4 @@
+timestamp,symbol,price,signal,order_action,order_status,order_id,order_qty,comment
+2026-06-24T15:59:16.934843+00:00,NVDA,45.08000183105469,1,submit,dry-run,,,
+2026-06-24T15:59:16.934843+00:00,SNDK,47.099998474121094,0,none,,,,
+2026-06-24T15:59:16.934843+00:00,CNQ,56.06999969482422,0,none,,,,

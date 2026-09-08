@@ -1,0 +1,46 @@
+Metadata-Version: 2.4
+Name: velorix
+Version: 0.1.0
+Summary: Personal quant trading toolkit
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: pandas>=2.0
+Requires-Dist: numpy
+Requires-Dist: yfinance
+Requires-Dist: matplotlib
+Requires-Dist: pytest
+Requires-Dist: alpaca-trade-api
+Requires-Dist: python-dotenv
+Requires-Dist: pandas-datareader
+
+# Velorix (Personal)
+
+Minimal Python quant trading scaffold: data ingestion, simple strategies, backtester, and Alpaca paper/live execution.
+
+Quick start
+
+1. Create and activate a Python 3.10+ venv.
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
+
+2. Copy `.env.example` to `.env` and fill your Alpaca keys.
+
+3. Dry-run stream live Alpaca market data (no orders):
+
+```bash
+python scripts/stream_and_trade.py --tickers AAPL NVDA QQQ BTC-USD --interval 10
+```
+
+4. Paper submit (be careful):
+
+```bash
+python scripts/stream_and_trade.py --tickers AAPL NVDA --interval 10 --confirm
+```
+
+Notes
+- For Canadian exchanges, add IBKR later — Alpaca covers US equities and some crypto only.
+- Adjust sizing in `quanttrader/config.py` or set `ORDER_DOLLARS` in `.env`.

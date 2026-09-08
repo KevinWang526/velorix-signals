@@ -25,6 +25,15 @@ Use the steps below to create a permanent HTTPS demo URL using Render (backend) 
 
 5. Render will provide a stable HTTPS URL such as `https://your-app.onrender.com`.
 
+### Automated deploy via GitHub Actions
+
+If you want automatic deploys when you push to `main`, add these two repository secrets in GitHub Settings → Secrets:
+
+- `RENDER_API_KEY` — your Render API key (create one at https://dashboard.render.com/account/api-keys)
+- `RENDER_SERVICE_ID` — the service ID for the backend (found in the Render service settings URL or API)
+
+A GitHub Actions workflow (`.github/workflows/deploy-backend-render.yml`) is included and will trigger a Render deploy when you push to `main`.
+
 ## Frontend (Vercel)
 
 1. In Vercel, create a new project and import the same GitHub repo.
