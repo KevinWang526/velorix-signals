@@ -22,11 +22,11 @@ jobs:
             exit 1;
           fi
 
-          services=$(curl --fail-with-body -sS https://api.render.com/v1/services?limit=100 \
+          services=$(curl --fail-with-body --max-time 30 -sS https://api.render.com/v1/services?limit=100 \
             -H "Authorization: Bearer ${RENDER_API_KEY}")
           service_id=$(echo "$services" | jq -r '.. | objects | select(.name? == "velorix-backend" and (.id? | strings | startswith("srv-"))) | .id' | head -n 1)
           if [ -z "$service_id" ]; then
-            owner_id=$(curl --fail-with-body -sS https://api.render.com/v1/owners?limit=100 \
+            owner_id=$(curl --fail-with-body --max-time 30 -sS https://api.render.com/v1/owners?limit=100 \
               -H "Authorization: Bearer ${RENDER_API_KEY}" | jq -r '.[0].owner.id')
             if [ -z "$owner_id" ] || [ "$owner_id" = "null" ]; then
               echo "No Render workspace was found for this API key.";
@@ -35,7 +35,7 @@ jobs:
             create_payload=$(jq -n \
               --arg owner_id "$owner_id" \
               '{type:"web_service",name:"velorix-backend",ownerId:$owner_id,repo:"https://github.com/KevinWang526/velorix-signals",branch:"main",autoDeployTrigger:"commit",serviceDetails:{runtime:"python",plan:"free",region:"oregon",healthCheckPath:"/trade/health",envSpecificDetails:{buildCommand:"pip install -r backend/requirements.txt",startCommand:"uvicorn backend.app:app --host 0.0.0.0 --port $PORT"}}}')
-            service_response=$(curl --fail-with-body -sS -X POST https://api.render.com/v1/services \
+            service_response=$(curl --fail-with-body --max-time 30 -sS -X POST https://api.render.com/v1/services \
               -H "Authorization: Bearer ${RENDER_API_KEY}" \
               -H "Content-Type: application/json" \
               -d "$create_payload")
@@ -46,7 +46,7 @@ jobs:
             exit 1;
           fi
 
-          service_json=$(curl --fail-with-body -sS https://api.render.com/v1/services/${service_id} \
+          service_json=$(curl --fail-with-body --max-time 30 -sS https://api.render.com/v1/services/${service_id} \
             -H "Authorization: Bearer ${RENDER_API_KEY}")
           service_url=$(echo "$service_json" | jq -r '.serviceDetails.url // .url // empty')
           if [ -z "$service_url" ]; then
@@ -56,13 +56,13 @@ jobs:
           echo "Render service URL: ${service_url}"
 
           echo "Posting deploy request to Render service ${service_id}..."
-          curl --fail-with-body -sS -X POST https://api.render.com/v1/services/${service_id}/deploys \
+          curl --fail-with-body --max-time 30 -sS -X POST https://api.render.com/v1/services/${service_id}/deploys \
             -H "Authorization: Bearer ${RENDER_API_KEY}" \
             -H "Content-Type: application/json" \
             -d '{"clearCache": "do_not_clear"}'
 
           for attempt in $(seq 1 30); do
-            if curl --fail --silent --show-error "${service_url}/trade/health" >/dev/null; then
+            if curl --fail --max-time 15 --silent --show-error "${service_url}/trade/health" >/dev/null; then
               echo "Render backend is healthy at ${service_url}"
               exit 0
             fi
