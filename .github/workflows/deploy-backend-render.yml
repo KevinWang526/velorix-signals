@@ -46,8 +46,28 @@ jobs:
             exit 1;
           fi
 
+          service_json=$(curl --fail-with-body -sS https://api.render.com/v1/services/${service_id} \
+            -H "Authorization: Bearer ${RENDER_API_KEY}")
+          service_url=$(echo "$service_json" | jq -r '.serviceDetails.url // .url // empty')
+          if [ -z "$service_url" ]; then
+            echo "Render did not return a public service URL for ${service_id}.";
+            exit 1;
+          fi
+          echo "Render service URL: ${service_url}"
+
           echo "Posting deploy request to Render service ${service_id}..."
           curl --fail-with-body -sS -X POST https://api.render.com/v1/services/${service_id}/deploys \
             -H "Authorization: Bearer ${RENDER_API_KEY}" \
             -H "Content-Type: application/json" \
             -d '{"clearCache": "do_not_clear"}'
+
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent --show-error "${service_url}/trade/health" >/dev/null; then
+              echo "Render backend is healthy at ${service_url}"
+              exit 0
+            fi
+            echo "Waiting for Render backend (${attempt}/30)..."
+            sleep 10
+          done
+          echo "Render backend did not become healthy at ${service_url}."
+          exit 1
