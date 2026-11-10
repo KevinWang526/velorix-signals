@@ -50,4 +50,4 @@ jobs:
           curl --fail-with-body -sS -X POST https://api.render.com/v1/services/${service_id}/deploys \
             -H "Authorization: Bearer ${RENDER_API_KEY}" \
             -H "Content-Type: application/json" \
-            -d '{"clearCache": false}'
+            -d '{"clearCache": "do_not_clear"}'
