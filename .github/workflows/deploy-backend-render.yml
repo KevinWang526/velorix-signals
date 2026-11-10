@@ -25,11 +25,24 @@ jobs:
           services=$(curl --fail-with-body -sS https://api.render.com/v1/services?limit=100 \
             -H "Authorization: Bearer ${RENDER_API_KEY}")
           service_id=$(echo "$services" | jq -r '.. | objects | select(.name? == "velorix-backend" and (.id? | strings | startswith("srv-"))) | .id' | head -n 1)
-          if [ -z "$service_id" ] || [ "$service_id" = "null" ]; then
-            service_id="$RENDER_SERVICE_ID"
-          fi
           if [ -z "$service_id" ]; then
-            echo "No Render service named velorix-backend was found.";
+            owner_id=$(curl --fail-with-body -sS https://api.render.com/v1/owners?limit=100 \
+              -H "Authorization: Bearer ${RENDER_API_KEY}" | jq -r '.[0].owner.id')
+            if [ -z "$owner_id" ] || [ "$owner_id" = "null" ]; then
+              echo "No Render workspace was found for this API key.";
+              exit 1;
+            fi
+            create_payload=$(jq -n \
+              --arg owner_id "$owner_id" \
+              '{type:"web_service",name:"velorix-backend",ownerId:$owner_id,repo:"https://github.com/KevinWang526/velorix-signals",branch:"main",autoDeployTrigger:"commit",serviceDetails:{runtime:"python",plan:"free",region:"oregon",healthCheckPath:"/trade/health",envSpecificDetails:{buildCommand:"pip install -r backend/requirements.txt",startCommand:"uvicorn backend.app:app --host 0.0.0.0 --port $PORT"}}}')
+            service_response=$(curl --fail-with-body -sS -X POST https://api.render.com/v1/services \
+              -H "Authorization: Bearer ${RENDER_API_KEY}" \
+              -H "Content-Type: application/json" \
+              -d "$create_payload")
+            service_id=$(echo "$service_response" | jq -r '.service.id')
+          fi
+          if [ -z "$service_id" ] || [ "$service_id" = "null" ]; then
+            echo "Unable to find or create the velorix-backend Render service.";
             exit 1;
           fi
 
