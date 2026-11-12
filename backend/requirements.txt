@@ -1,6 +1,16 @@
 fastapi
 uvicorn[standard]
+requests
+beautifulsoup4
 yfinance
 pandas
 numpy
 pytest
+python-multipart
+Pillow
+pytesseract
+PyPDF2
+python-docx
+openpyxl
+yt-dlp
+alpaca-trade-api

@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "/signals",
+      "destination": "/"
+    },
+    {
+      "source": "/api/:path*",
+      "destination": "https://velorix-backend-xqnn.onrender.com/:path*"
+    }
+  ]
+}
