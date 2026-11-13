@@ -6,7 +6,7 @@
     },
     {
       "source": "/api/:path*",
-      "destination": "https://velorix-backend-xqnn.onrender.com/:path*"
+      "destination": "https://velorix-backend-public.onrender.com/:path*"
     }
   ]
 }

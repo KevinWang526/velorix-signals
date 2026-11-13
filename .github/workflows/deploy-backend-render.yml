@@ -55,12 +55,6 @@ jobs:
           fi
           echo "Render service URL: ${service_url}"
 
-          echo "Posting deploy request to Render service ${service_id}..."
-          curl --fail-with-body --max-time 30 -sS -X POST https://api.render.com/v1/services/${service_id}/deploys \
-            -H "Authorization: Bearer ${RENDER_API_KEY}" \
-            -H "Content-Type: application/json" \
-            -d '{"clearCache": "do_not_clear"}'
-
           for attempt in $(seq 1 30); do
             if curl --fail --max-time 15 --silent --show-error "${service_url}/trade/health" >/dev/null; then
               echo "Render backend is healthy at ${service_url}"
