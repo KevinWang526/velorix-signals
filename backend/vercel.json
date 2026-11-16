@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    { "source": "/api/trade/signals", "destination": "/api/trade_signals" },
+    { "source": "/api/trade/connect", "destination": "/api/trade_connect" },
+    { "source": "/api/trade/run_once", "destination": "/api/trade_run_once" },
+    { "source": "/api/trade/health", "destination": "/api/trade_health" }
+  ]
+}

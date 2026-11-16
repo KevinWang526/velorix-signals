@@ -18,6 +18,23 @@ from datetime import datetime, timedelta
 
 app = FastAPI(title='Velorix API')
 
+
+@app.middleware('http')
+async def strip_vercel_api_prefix(request: Request, call_next):
+    path = request.scope.get('path', '')
+    aliases = {
+        '/api/trade_signals': '/trade/signals',
+        '/api/trade_connect': '/trade/connect',
+        '/api/trade_run_once': '/trade/run_once',
+        '/api/trade_health': '/trade/health',
+    }
+    if path in aliases:
+        request.scope['path'] = aliases[path]
+        return await call_next(request)
+    if path == '/api' or path.startswith('/api/'):
+        request.scope['path'] = path[4:] or '/'
+    return await call_next(request)
+
 # Ensure uploads directory exists and serve it at /api/uploads
 UPLOADS_DIR = os.path.join(os.path.dirname(__file__), 'uploads')
 os.makedirs(UPLOADS_DIR, exist_ok=True)
@@ -29,8 +46,6 @@ app.mount('/api/uploads', StaticFiles(directory=UPLOADS_DIR), name='uploads')
 try:
     import yfinance as yf
     import pandas as pd
-    from quanttrader.strategy import MomentumStrategy
-    from quanttrader.alpaca import AlpacaMarketData, AlpacaExecution
     try:
         from yfinance.shared import YFRateLimitError
     except Exception:
@@ -38,9 +53,28 @@ try:
 except Exception:
     yf = None
     pd = None
-    MomentumStrategy = None
-    AlpacaMarketData = None
     YFRateLimitError = Exception
+
+try:
+    from quanttrader.strategy import MomentumStrategy
+except Exception:
+    class MomentumStrategy:
+        def __init__(self, short_window=20, long_window=50, momentum_window=3):
+            self.short_window = short_window
+            self.long_window = long_window
+            self.momentum_window = momentum_window
+
+        def generate_signals(self, price):
+            short_ema = price.ewm(span=self.short_window, adjust=False).mean()
+            long_ema = price.ewm(span=self.long_window, adjust=False).mean()
+            momentum = price.pct_change(self.momentum_window)
+            return ((short_ema > long_ema) & (price > short_ema) & (momentum > 0)).fillna(False).astype(int)
+
+try:
+    from quanttrader.alpaca import AlpacaMarketData, AlpacaExecution
+except Exception:
+    AlpacaMarketData = None
+    AlpacaExecution = None
 
 DEFAULT_WATCHLIST = ['AAPL', 'MSFT', 'NVDA', 'QQQ', 'SPY', 'IWM', 'TSLA', 'AMZN', 'META', 'GOOG']
 SIGNALS_CACHE = {'expires_at': None, 'payload': None}
